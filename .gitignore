@@ -9,3 +9,4 @@ bimg.vcxproj
 bimg.vcxproj.filters
 /bin-int
 /bin
+*.user

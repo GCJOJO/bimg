@@ -34,6 +34,11 @@ project "bimg"
 		"bx"
 	}
 	
+	defines
+	{
+		"BX_CONFIG_DEBUG"
+	}
+
 	filter "system:windows"
 		systemversion "latest"
 		buildoptions { "/Zc:__cplusplus", "/Zc:preprocessor" }
@@ -42,10 +47,7 @@ project "bimg"
 	filter "configurations:Debug"
 		runtime "Debug"
 		symbols "on"
-		defines
-        {
-            "BX_CONFIG_DEBUG"
-        }
+		
 
 	filter "configurations:Release"
 		runtime "Release"
