@@ -41,11 +41,21 @@ projgen: ## Generate project files for all configurations.
 	$(GENIE) --with-tools --with-shared-lib --gcc=linux-gcc       gmake
 	$(GENIE) --with-tools --with-shared-lib --gcc=linux-clang     gmake
 	$(GENIE) --with-tools --with-shared-lib --gcc=osx-arm64       gmake
+	$(GENIE) --with-tools --with-shared-lib --gcc=osx-x64         gmake
 	$(GENIE) --with-tools --with-shared-lib --xcode=osx           xcode9
 	$(GENIE) --with-tools --with-shared-lib --xcode=ios           xcode9
+	$(GENIE)              --with-shared-lib --gcc=android-arm     gmake
 	$(GENIE)              --with-shared-lib --gcc=android-arm64   gmake
 	$(GENIE)                                --gcc=ios-arm64       gmake
 	$(GENIE)                                --gcc=rpi             gmake
+
+.build/projects/gmake-android-arm:
+	$(GENIE) --gcc=android-arm --with-shared-lib gmake
+android-arm-debug: .build/projects/gmake-android-arm ## Build - Android ARM Debug
+	$(MAKE) -R -C .build/projects/gmake-android-arm config=debug
+android-arm-release: .build/projects/gmake-android-arm ## Build - Android ARM Release
+	$(MAKE) -R -C .build/projects/gmake-android-arm config=release
+android-arm: android-arm-debug android-arm-release ## Build - Android ARM Debug and Release
 
 .build/projects/gmake-android-arm64:
 	$(GENIE) --gcc=android-arm64 --with-shared-lib gmake
@@ -123,6 +133,14 @@ osx-arm64-release: .build/projects/gmake-osx-arm64 ## Build - macOS ARM Release
 	$(MAKE) -C .build/projects/gmake-osx-arm64 config=release
 osx-arm64: osx-arm64-debug osx-arm64-release ## Build - macOS ARM Debug and Release
 
+.build/projects/gmake-osx-x64:
+	$(GENIE) --with-tools --with-shared-lib --gcc=osx-x64 gmake
+osx-x64-debug: .build/projects/gmake-osx-x64 ## Build - macOS x64 Debug
+	$(MAKE) -C .build/projects/gmake-osx-x64 config=debug
+osx-x64-release: .build/projects/gmake-osx-x64 ## Build - macOS x64 Release
+	$(MAKE) -C .build/projects/gmake-osx-x64 config=release
+osx-x64: osx-x64-debug osx-x64-release ## Build - macOS x64 Debug and Release
+
 .build/projects/gmake-ios-arm64:
 	$(GENIE) --gcc=ios-arm64 gmake
 ios-arm64-debug: .build/projects/gmake-ios-arm64 ## Build - iOS ARM64 Debug
@@ -177,7 +195,11 @@ texturev: .build/projects/$(BUILD_PROJECT_DIR) ## Build texturev tool.
 	$(SILENT) $(MAKE) -C .build/projects/$(BUILD_PROJECT_DIR) texturev config=$(BUILD_TOOLS_CONFIG)
 	$(SILENT) cp .build/$(BUILD_OUTPUT_DIR)/bin/texturev$(BUILD_TOOLS_SUFFIX)$(EXE) tools/bin/$(OS)/texturev$(EXE)
 
-tools: texturec texturev ## Build tools.
+meta: .build/projects/$(BUILD_PROJECT_DIR) ## Build meta tool.
+	$(SILENT) $(MAKE) -C .build/projects/$(BUILD_PROJECT_DIR) meta config=$(BUILD_TOOLS_CONFIG)
+	$(SILENT) cp .build/$(BUILD_OUTPUT_DIR)/bin/meta$(BUILD_TOOLS_SUFFIX)$(EXE) tools/bin/$(OS)/meta$(EXE)
+
+tools: texturec texturev meta ## Build tools.
 
 clean-tools: ## Clean tools projects.
 	-$(SILENT) rm -r .build/projects/$(BUILD_PROJECT_DIR)
